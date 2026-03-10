@@ -12,6 +12,8 @@ import {
 } from 'obsidian';
 import { registerPatch } from 'obsidian-dev-utils/obsidian/MonkeyAround';
 
+export const INDENT_CSS_VAR = '--nested-properties-indent';
+
 type RenderFn = (el: HTMLElement, value: unknown, ctx: PropertyRenderContext) => PropertyWidgetComponentBase;
 
 const expandedPaths = new Set<string>();
@@ -171,6 +173,35 @@ function renderAddPropertyButton(containerEl: HTMLElement, obj: GenericObject, o
   });
 }
 
+function isFlatObject(value: unknown): value is GenericObject {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  return Object.values(value as GenericObject).every((v) => !isComplexValue(v));
+}
+
+function isFlatObjectArray(arr: unknown[]): arr is GenericObject[] {
+  return arr.length > 0 && arr.every(isFlatObject);
+}
+
+function renderCompactObjectRow(
+  containerEl: HTMLElement,
+  obj: GenericObject,
+  onValueChange: (newValue: unknown) => void,
+  onDelete: () => void
+): void {
+  const rowEl = containerEl.createDiv({ cls: 'nested-properties-flat-row' });
+  const text = Object.values(obj)
+    .filter((v) => v !== null && v !== undefined && v !== '')
+    .join(', ');
+  rowEl.createSpan({ cls: 'nested-properties-flat-row-text', text });
+
+  rowEl.addEventListener('contextmenu', (e) => {
+    e.stopPropagation();
+    showNestedPropertyMenu(e, '', obj, onValueChange, onDelete);
+  });
+}
+
 function renderArray(
   plugin: Plugin,
   containerEl: HTMLElement,
@@ -179,6 +210,20 @@ function renderArray(
   parentPath: string,
   onArrayChange: (newValue: unknown) => void
 ): void {
+  if (isFlatObjectArray(arr)) {
+    for (const [index, item] of arr.entries()) {
+      renderCompactObjectRow(containerEl, item, (newValue: unknown) => {
+        const newArr: unknown[] = [...arr];
+        newArr[index] = newValue;
+        onArrayChange(newArr);
+      }, () => {
+        const newArr = arr.filter((_, i) => i !== index);
+        onArrayChange(newArr);
+      });
+    }
+    return;
+  }
+
   for (const [index, item] of arr.entries()) {
     renderEntry(plugin, containerEl, String(index), item, ctx, parentPath, (newValue: unknown) => {
       const newArr = [...arr];

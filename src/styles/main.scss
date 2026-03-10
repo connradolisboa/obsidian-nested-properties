@@ -5,7 +5,7 @@
   > .metadata-property-value {
     overflow: visible;
     width: 100%;
-    margin-left: 144px;
+    margin-left: var(--nested-properties-indent, 144px);
   }
 
   &.is-collapsed {
@@ -39,7 +39,7 @@
       flex-direction: column;
       overflow: visible;
       width: 100%;
-      margin-left: 144px;
+      margin-left: var(--nested-properties-indent, 144px);
 
 }
 
@@ -134,4 +134,25 @@
     width: 10px;
     height: 10px;
   }
+}
+
+.nested-properties-flat-row {
+  display: flex;
+  align-items: center;
+  padding: 2px 4px;
+  font-size: var(--metadata-label-font-size);
+  color: var(--text-normal);
+  cursor: default;
+  border-radius: var(--radius-s);
+
+  &:hover {
+    background: var(--background-modifier-hover);
+  }
+}
+
+.nested-properties-flat-row-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
