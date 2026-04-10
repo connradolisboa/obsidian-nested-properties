@@ -65,27 +65,32 @@ function appendValuePreview(parent: HTMLElement, value: unknown, onToggle?: () =
   }
 }
 
-function createSummary(parentEl: HTMLElement, value: unknown, propertyEl: HTMLElement, path: string, onValueChange?: (newValue: unknown) => void): void {
+function createSummary(parentEl: HTMLElement, value: unknown, propertyEl: HTMLElement, path: string, onValueChange?: (newValue: unknown) => void): (newValue: unknown) => void {
   const summary = parentEl.createSpan({ cls: 'nested-properties-summary' });
 
-  if (isFlatObject(value)) {
-    const entries = Object.entries(value);
-    if (entries.length === 0) {
-      summary.appendText('{ }');
+  function renderContent(val: unknown): void {
+    summary.empty();
+    if (isFlatObject(val)) {
+      const entries = Object.entries(val);
+      if (entries.length === 0) {
+        summary.appendText('{ }');
+      } else {
+        entries.forEach(([key, v], i) => {
+          if (i > 0) {
+            summary.appendText(', ');
+          }
+          const onToggle = onValueChange && typeof v === 'boolean'
+            ? (): void => { onValueChange({ ...(val as GenericObject), [key]: !v }); }
+            : undefined;
+          appendValuePreview(summary, v, onToggle);
+        });
+      }
     } else {
-      entries.forEach(([key, val], i) => {
-        if (i > 0) {
-          summary.appendText(', ');
-        }
-        const onToggle = onValueChange && typeof val === 'boolean'
-          ? (): void => { onValueChange({ ...value, [key]: !val }); }
-          : undefined;
-        appendValuePreview(summary, val, onToggle);
-      });
+      summary.appendText(Array.isArray(val) ? '[ ... ]' : '{ ... }');
     }
-  } else {
-    summary.appendText(Array.isArray(value) ? '[ ... ]' : '{ ... }');
   }
+
+  renderContent(value);
 
   summary.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -93,6 +98,8 @@ function createSummary(parentEl: HTMLElement, value: unknown, propertyEl: HTMLEl
     propertyEl.classList.remove('is-collapsed');
     expandedPaths.add(path);
   });
+
+  return renderContent;
 }
 
 function expandAllIn(parentNode: ParentNode): void {
@@ -305,9 +312,14 @@ function renderEntry(
     keyInput.size = Math.max(1, label.length);
 
     const valueEl = propertyEl.createDiv({ cls: 'metadata-property-value' });
-    createSummary(valueEl, value, propertyEl, path, onValueChange);
+    let updateSummary: (newValue: unknown) => void = () => { /* assigned below */ };
+    const handleValueChange = (newValue: unknown): void => {
+      updateSummary(newValue);
+      onValueChange(newValue);
+    };
+    updateSummary = createSummary(valueEl, value, propertyEl, path, handleValueChange);
     const nestedContainer = valueEl.createDiv({ cls: 'nested-properties-container' });
-    renderNestedValue(plugin, nestedContainer, value, ctx, path, onValueChange);
+    renderNestedValue(plugin, nestedContainer, value, ctx, path, handleValueChange);
     return;
   }
   const propertyEl = containerEl.createDiv({ cls: 'metadata-property' });
