@@ -87,6 +87,12 @@
   align-items: center;
   margin-left: 4px;
   vertical-align: middle;
+  opacity: 0;
+  transition: opacity 150ms;
+}
+
+.metadata-container:hover .nested-properties-header-actions {
+  opacity: 1;
 }
 
 .nested-properties-add-property {
@@ -134,25 +140,4 @@
     width: 10px;
     height: 10px;
   }
-}
-
-.nested-properties-flat-row {
-  display: flex;
-  align-items: center;
-  padding: 2px 4px;
-  font-size: var(--metadata-label-font-size);
-  color: var(--text-normal);
-  cursor: default;
-  border-radius: var(--radius-s);
-
-  &:hover {
-    background: var(--background-modifier-hover);
-  }
-}
-
-.nested-properties-flat-row-text {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }

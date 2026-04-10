@@ -105,6 +105,13 @@ function isComplexValue(value: unknown): value is GenericObject | unknown[] {
   return value !== null && typeof value === 'object';
 }
 
+function isFlatObject(value: unknown): value is GenericObject {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  return Object.values(value as GenericObject).every((v) => !isComplexValue(v));
+}
+
 function reloadAllProperties(plugin: Plugin): void {
   for (const leaf of plugin.app.workspace.getLeavesOfType('markdown')) {
     if (leaf.view instanceof MarkdownView) {
@@ -173,34 +180,6 @@ function renderAddPropertyButton(containerEl: HTMLElement, obj: GenericObject, o
   });
 }
 
-function isFlatObject(value: unknown): value is GenericObject {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
-    return false;
-  }
-  return Object.values(value as GenericObject).every((v) => !isComplexValue(v));
-}
-
-function isFlatObjectArray(arr: unknown[]): arr is GenericObject[] {
-  return arr.length > 0 && arr.every(isFlatObject);
-}
-
-function renderCompactObjectRow(
-  containerEl: HTMLElement,
-  obj: GenericObject,
-  onValueChange: (newValue: unknown) => void,
-  onDelete: () => void
-): void {
-  const rowEl = containerEl.createDiv({ cls: 'nested-properties-flat-row' });
-  const text = Object.values(obj)
-    .filter((v) => v !== null && v !== undefined && v !== '')
-    .join(', ');
-  rowEl.createSpan({ cls: 'nested-properties-flat-row-text', text });
-
-  rowEl.addEventListener('contextmenu', (e) => {
-    e.stopPropagation();
-    showNestedPropertyMenu(e, '', obj, onValueChange, onDelete);
-  });
-}
 
 function renderArray(
   plugin: Plugin,
@@ -210,29 +189,27 @@ function renderArray(
   parentPath: string,
   onArrayChange: (newValue: unknown) => void
 ): void {
-  if (isFlatObjectArray(arr)) {
-    for (const [index, item] of arr.entries()) {
-      renderCompactObjectRow(containerEl, item, (newValue: unknown) => {
-        const newArr: unknown[] = [...arr];
-        newArr[index] = newValue;
-        onArrayChange(newArr);
-      }, () => {
-        const newArr = arr.filter((_, i) => i !== index);
-        onArrayChange(newArr);
-      });
-    }
-    return;
-  }
-
   for (const [index, item] of arr.entries()) {
-    renderEntry(plugin, containerEl, String(index), item, ctx, parentPath, (newValue: unknown) => {
+    const onValueChange = (newValue: unknown): void => {
       const newArr = [...arr];
       newArr[index] = newValue;
       onArrayChange(newArr);
-    }, () => {
-      const newArr = arr.filter((_, i) => i !== index);
-      onArrayChange(newArr);
-    });
+    };
+    const onDelete = (): void => {
+      onArrayChange(arr.filter((_, i) => i !== index));
+    };
+
+    if (isFlatObject(item)) {
+      const propertyEl = containerEl.createDiv({ cls: 'metadata-property' });
+      propertyEl.addEventListener('contextmenu', (e) => {
+        e.stopPropagation();
+        showNestedPropertyMenu(e, String(index), item, onValueChange, onDelete);
+      });
+      const valueEl = propertyEl.createDiv({ cls: 'metadata-property-value' });
+      valueEl.createSpan({ text: Object.values(item).join(', ') });
+    } else {
+      renderEntry(plugin, containerEl, String(index), item, ctx, parentPath, onValueChange, onDelete);
+    }
   }
 }
 
@@ -306,6 +283,7 @@ function renderEntry(
   const widget = typeInfo.inferred;
   const valueEl = propertyEl.createDiv({ cls: 'metadata-property-value' });
   valueEl.setAttr('data-property-type', widget.type);
+  valueEl.title = label;
   widget.render(valueEl, value, {
     app: ctx.app,
     blur: ctx.blur.bind(ctx),
