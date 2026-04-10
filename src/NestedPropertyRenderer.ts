@@ -47,8 +47,46 @@ function collapseAllIn(parentNode: ParentNode): void {
   }
 }
 
-function createSummary(parentEl: HTMLElement, value: unknown, propertyEl: HTMLElement, path: string): void {
-  const summary = parentEl.createSpan({ cls: 'nested-properties-summary', text: Array.isArray(value) ? '[ ... ]' : '{ ... }' });
+function appendValuePreview(parent: HTMLElement, value: unknown, onToggle?: () => void): void {
+  if (typeof value === 'boolean') {
+    const checkbox = parent.createEl('input', { attr: { type: 'checkbox' } });
+    checkbox.checked = value;
+    if (onToggle) {
+      checkbox.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        onToggle();
+      });
+    } else {
+      checkbox.disabled = true;
+    }
+  } else {
+    parent.createSpan({ text: value === null ? 'null' : String(value) });
+  }
+}
+
+function createSummary(parentEl: HTMLElement, value: unknown, propertyEl: HTMLElement, path: string, onValueChange?: (newValue: unknown) => void): void {
+  const summary = parentEl.createSpan({ cls: 'nested-properties-summary' });
+
+  if (isFlatObject(value)) {
+    const entries = Object.entries(value);
+    if (entries.length === 0) {
+      summary.appendText('{ }');
+    } else {
+      entries.forEach(([key, val], i) => {
+        if (i > 0) {
+          summary.appendText(', ');
+        }
+        const onToggle = onValueChange && typeof val === 'boolean'
+          ? (): void => { onValueChange({ ...value, [key]: !val }); }
+          : undefined;
+        appendValuePreview(summary, val, onToggle);
+      });
+    }
+  } else {
+    summary.appendText(Array.isArray(value) ? '[ ... ]' : '{ ... }');
+  }
+
   summary.addEventListener('click', (e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -267,7 +305,7 @@ function renderEntry(
     keyInput.size = Math.max(1, label.length);
 
     const valueEl = propertyEl.createDiv({ cls: 'metadata-property-value' });
-    createSummary(valueEl, value, propertyEl, path);
+    createSummary(valueEl, value, propertyEl, path, onValueChange);
     const nestedContainer = valueEl.createDiv({ cls: 'nested-properties-container' });
     renderNestedValue(plugin, nestedContainer, value, ctx, path, onValueChange);
     return;
@@ -406,7 +444,7 @@ function renderUnknownWidget(plugin: Plugin, next: RenderFn, el: HTMLElement, va
   }
 
   if (propertyEl instanceof HTMLElement) {
-    createSummary(el, value, propertyEl, rootPath);
+    createSummary(el, value, propertyEl, rootPath, (newValue) => { ctx.onChange(newValue); });
   }
 
   const containerEl = el.createDiv({ cls: 'nested-properties-container' });

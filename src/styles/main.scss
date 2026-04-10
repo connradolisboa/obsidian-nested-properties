@@ -72,6 +72,12 @@
   font-style: italic;
   cursor: pointer;
   white-space: nowrap;
+
+  input[type="checkbox"] {
+    vertical-align: middle;
+    margin: 0 1px;
+    cursor: pointer;
+  }
 }
 
 .nested-properties-collapsible.is-collapsed > .metadata-property-value > .nested-properties-summary {
