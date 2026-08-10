@@ -2,7 +2,7 @@ name: Bug report
 description: Report a bug and help improve the plugin
 title: "[BUG] Short description of the bug"
 labels: bug
-assignees: mnaoumov
+assignees: connradolisboa
 body:
   - type: markdown
     attributes:

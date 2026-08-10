@@ -1,10 +1,10 @@
 {
-  "name": "nested-properties",
+  "name": "nested-properties-fork",
   "version": "1.0.0",
   "description": "Allows to view/edit nested frontmatter properties.",
   "keywords": [],
   "license": "MIT",
-  "author": "mnaoumov",
+  "author": "Connrado Lisboa",
   "type": "module",
   "scripts": {
     "build": "obsidian-dev-utils build",
@@ -41,5 +41,14 @@
     "@antfu/utils": "9.2.0",
     "boolean": "npm:dry-uninstall",
     "dompurify": "3.0.1"
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.5.6": true,
+    "dprint@0.52.0": true,
+    "electron@39.2.7": true,
+    "esbuild@0.27.3": true,
+    "obsidian-typings@4.110.0": true,
+    "svelte-preprocess@6.0.3": true,
+    "unrs-resolver@1.11.1": true
   }
 }

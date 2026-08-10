@@ -2,7 +2,7 @@ name: Feature request
 description: Request a feature and help improve the plugin
 title: "[FR] Short description of the feature"
 labels: enhancement
-assignees: mnaoumov
+assignees: connradolisboa
 body:
   - type: markdown
     attributes:

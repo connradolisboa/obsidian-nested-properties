@@ -1,9 +1,8 @@
 {
-  "author": "mnaoumov",
-  "authorUrl": "https://github.com/mnaoumov/",
+  "author": "Connrado Lisboa",
+  "authorUrl": "https://github.com/connradolisboa/",
   "description": "Allows to view/edit nested frontmatter properties.",
-  "fundingUrl": "https://www.buymeacoffee.com/mnaoumov",
-  "id": "nested-properties",
+  "id": "nested-properties-fork",
   "isDesktopOnly": false,
   "name": "Nested Properties",
   "version": "1.0.0",
