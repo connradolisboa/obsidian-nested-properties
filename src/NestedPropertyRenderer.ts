@@ -150,6 +150,14 @@ function isComplexValue(value: unknown): value is GenericObject | unknown[] {
   return value !== null && typeof value === 'object';
 }
 
+function isFlatArray(value: unknown): value is unknown[] {
+  return Array.isArray(value) && value.every((v) => !isComplexValue(v));
+}
+
+function isFoldableValue(value: unknown): value is GenericObject | unknown[] {
+  return isComplexValue(value) && !isFlatArray(value);
+}
+
 function isFlatObject(value: unknown): value is GenericObject {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     return false;
@@ -270,7 +278,7 @@ function renderEntry(
 ): void {
   const path = parentPath ? `${parentPath}.${label}` : label;
 
-  if (isComplexValue(value)) {
+  if (isFoldableValue(value)) {
     const isExpanded = expandedPaths.has(path);
     const propertyEl = containerEl.createDiv({
       attr: { 'data-path': path },
@@ -409,7 +417,7 @@ function renderObject(
 }
 
 function renderUnknownWidget(plugin: Plugin, next: RenderFn, el: HTMLElement, value: unknown, ctx: PropertyRenderContext): PropertyWidgetComponentBase {
-  if (!isComplexValue(value)) {
+  if (!isFoldableValue(value)) {
     return next(el, value, ctx);
   }
 
