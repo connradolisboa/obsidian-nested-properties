@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.1.0
+
+- feat: Add a List of objects property type with editable table rows
+- feat: Make nested property controls touch-friendly and tables horizontally scrollable on mobile
+- fix: Start nested properties collapsed by default
+
 ## 2.0.0
 
 - Renamed to Nested Properties Plus (`nested-properties-plus`) with an `npp-` CSS prefix so it no longer collides with the original plugin

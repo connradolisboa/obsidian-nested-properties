@@ -16,7 +16,8 @@ import type { Plugin } from './Plugin.ts';
 
 import {
   ComplexWidgets,
-  LIST_WIDGET_TYPE
+  LIST_WIDGET_TYPE,
+  OBJECT_LIST_WIDGET_TYPE
 } from './ComplexWidgets.ts';
 import { TypeChangeModal } from './TypeChangeModal.ts';
 import {
@@ -328,15 +329,20 @@ class NestedTree {
   }
 
   private renderArray(containerEl: HTMLElement, arr: unknown[], path: string): void {
-    if (this.plugin.settings.shouldShowTables && isTableArray(arr)) {
+    const assigned = this.renderer.getAssignedWidget(path);
+    const isObjectList = assigned?.type === OBJECT_LIST_WIDGET_TYPE;
+    const isFlatObjectTable = this.plugin.settings.shouldShowTables && isTableArray(arr);
+    if ((isFlatObjectTable || (isObjectList && arr.length === 0)) && arr.every(isPlainObject)) {
+      containerEl.addClass('npp-object-list-layout');
       this.renderTable(containerEl, arr, path);
       return;
     }
+    containerEl.removeClass('npp-object-list-layout');
     for (const index of arr.keys()) {
       this.renderEntry(containerEl, { key: index, parent: arr, path: `${path}.${String(index)}` });
     }
-    this.addEntryButton(containerEl, 'Add item', () => {
-      arr.push('');
+    this.addEntryButton(containerEl, isObjectList ? 'Add row' : 'Add item', () => {
+      arr.push(isObjectList ? {} : '');
       this.renderer.pendingFocus = { path: `${path}.${String(arr.length - 1)}`, target: 'value' };
       this.commit(true);
     });
@@ -525,8 +531,14 @@ class NestedTree {
     }
 
     this.addEntryButton(containerEl, 'Add row', () => {
-      rows.push(Object.fromEntries(columns.map((column) => [column, null])));
-      const firstColumn = columns[0];
+      const row = Object.fromEntries(columns.map((column) => [column, null]));
+      // An explicitly typed object list can be empty and therefore has no columns yet.
+      // Give its first row one editable cell so Add row always produces a visible result.
+      if (columns.length === 0) {
+        row['value'] = null;
+      }
+      rows.push(row);
+      const firstColumn = columns[0] ?? (columns.length === 0 ? 'value' : undefined);
       if (firstColumn !== undefined) {
         this.renderer.pendingFocus = { path: `${path}.${String(rows.length - 1)}.${firstColumn}`, target: 'value' };
       }
@@ -862,7 +874,7 @@ export class NestedPropertyRenderer {
 
   private renderRoot(el: HTMLElement, value: unknown, ctx: PropertyRenderContext, widgetType: string): PropertyWidgetComponentBase {
     let model: Container;
-    if (widgetType === LIST_WIDGET_TYPE) {
+    if (widgetType === LIST_WIDGET_TYPE || widgetType === OBJECT_LIST_WIDGET_TYPE) {
       model = Array.isArray(value) ? cloneValue(value) : [];
     } else {
       model = isPlainObject(value) ? cloneValue(value) : {};

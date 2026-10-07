@@ -28,6 +28,8 @@ export function convertValue(targetType: string, value: unknown): unknown {
       return Number(convertToString(value)) || 0;
     case 'object':
       return isPlainObject(value) ? value : {};
+    case 'object-list':
+      return Array.isArray(value) ? value.filter(isPlainObject) : [];
     default:
       return isComplexValue(value) ? JSON.stringify(value) : convertToString(value);
   }
@@ -73,6 +75,8 @@ export function isLossyConversion(targetType: string, value: unknown): boolean {
       return !Array.isArray(value);
     case 'object':
       return !isPlainObject(value);
+    case 'object-list':
+      return !Array.isArray(value) || value.some((item) => !isPlainObject(item));
     default:
       return isComplexValue(value);
   }

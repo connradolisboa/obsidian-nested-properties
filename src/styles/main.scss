@@ -167,7 +167,7 @@
   align-items: center;
   gap: 4px;
   width: fit-content;
-  min-height: calc(var(--metadata-input-height) * 0.85);
+  min-height: max(32px, calc(var(--metadata-input-height) * 0.85));
   padding: 0 6px;
   border-radius: var(--radius-s);
   color: var(--text-faint);
@@ -205,8 +205,11 @@
 
 .npp-table-wrap {
   max-width: 100%;
+  min-width: 0;
   margin: 4px 0 2px;
   overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--radius-m);
 }
@@ -321,6 +324,43 @@
 
 .npp-table-filler {
   width: 1%;
+}
+
+// Keep object-list tables readable on touch screens; the wrapper provides a horizontal swipe area.
+@media (max-width: 600px) {
+  .npp-add-button {
+    min-height: 40px;
+    padding-inline: 10px;
+  }
+
+  .npp-table {
+    width: max-content;
+    min-width: 100%;
+
+    th {
+      min-height: 40px;
+      padding: 8px 10px;
+    }
+  }
+
+  .npp-table-cell {
+    min-width: 8em;
+  }
+
+  .npp-table-index {
+    min-width: 40px;
+    padding-inline: 10px;
+  }
+
+  .npp-table-add-column {
+    min-width: 40px;
+    text-align: center;
+  }
+
+  .npp-collapse-btn {
+    width: 32px;
+    height: 32px;
+  }
 }
 
 // Header actions next to the "Properties" heading.

@@ -18,6 +18,7 @@ import {
 
 export const LIST_WIDGET_TYPE = 'list';
 export const OBJECT_WIDGET_TYPE = 'object';
+export const OBJECT_LIST_WIDGET_TYPE = 'object-list';
 
 // A key no note uses, so `getTypeInfo` skips assigned types and infers purely from the value.
 const INFERENCE_KEY = '\u0000nested-properties-plus';
@@ -27,6 +28,7 @@ type ComplexRenderFn = (el: HTMLElement, value: unknown, ctx: PropertyRenderCont
 export class ComplexWidgets {
   public readonly listWidget: PropertyWidget;
   public readonly mixedListWidget: PropertyWidget;
+  public readonly objectListWidget: PropertyWidget;
   public readonly objectWidget: PropertyWidget;
   private readonly metadataTypeManager: MetadataTypeManager;
 
@@ -49,6 +51,14 @@ export class ComplexWidgets {
       type: OBJECT_WIDGET_TYPE,
       validate: (value): boolean => isPlainObject(value)
     };
+
+    this.objectListWidget = {
+      icon: 'lucide-table-2',
+      name: (): string => 'List of objects',
+      render: (el, value, ctx): PropertyWidgetComponentBase => render(el, value, ctx, OBJECT_LIST_WIDGET_TYPE),
+      type: OBJECT_LIST_WIDGET_TYPE,
+      validate: (value): boolean => Array.isArray(value) && value.every(isPlainObject)
+    };
   }
 
   /**
@@ -59,13 +69,14 @@ export class ComplexWidgets {
   }
 
   public isComplexWidget(widget: PropertyWidget | undefined): boolean {
-    return widget?.type === LIST_WIDGET_TYPE || widget?.type === OBJECT_WIDGET_TYPE;
+    return widget?.type === LIST_WIDGET_TYPE || widget?.type === OBJECT_WIDGET_TYPE || widget?.type === OBJECT_LIST_WIDGET_TYPE;
   }
 
   public register(): void {
     const registeredTypeWidgets = this.metadataTypeManager.registeredTypeWidgets;
     registeredTypeWidgets[LIST_WIDGET_TYPE] = this.mixedListWidget;
     registeredTypeWidgets[OBJECT_WIDGET_TYPE] = this.objectWidget;
+    registeredTypeWidgets[OBJECT_LIST_WIDGET_TYPE] = this.objectListWidget;
     this.plugin.register(() => {
       if (registeredTypeWidgets[LIST_WIDGET_TYPE] === this.mixedListWidget) {
         // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- Unregister widget on unload.
@@ -74,6 +85,10 @@ export class ComplexWidgets {
       if (registeredTypeWidgets[OBJECT_WIDGET_TYPE] === this.objectWidget) {
         // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- Unregister widget on unload.
         delete registeredTypeWidgets[OBJECT_WIDGET_TYPE];
+      }
+      if (registeredTypeWidgets[OBJECT_LIST_WIDGET_TYPE] === this.objectListWidget) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- Unregister widget on unload.
+        delete registeredTypeWidgets[OBJECT_LIST_WIDGET_TYPE];
       }
     });
 

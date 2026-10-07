@@ -1,10 +1,10 @@
 {
   "author": "Connrado Lisboa",
   "authorUrl": "https://github.com/connradolisboa/",
-  "description": "View and edit nested frontmatter properties in the Properties panel: tree, tables, mixed lists, objects and per-path types.",
+  "description": "View and edit nested frontmatter properties in the Properties panel: tree, tables, mixed lists, objects, object lists and per-path types.",
   "id": "nested-properties-plus",
   "isDesktopOnly": false,
   "name": "Nested Properties Plus",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "minAppVersion": "1.12.4"
 }

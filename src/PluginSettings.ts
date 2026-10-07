@@ -14,4 +14,4 @@ export interface PluginSettings {
 }
 
 export const DEFAULT_INDENTATION_LEVEL = 16;
-export const DEFAULT_INITIAL_EXPAND_LEVEL = 1;
+export const DEFAULT_INITIAL_EXPAND_LEVEL = 0;

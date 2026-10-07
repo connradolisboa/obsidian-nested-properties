@@ -30,21 +30,22 @@ level1Nested:
 ## Features
 
 - Nested objects and arrays render as a collapsible tree inside the native Properties panel (and the File properties sidebar)
-- New property types: **Mixed list** (arrays holding objects or mixed values) and **Object**, available in Obsidian's own *Property type* menu too
+- Nested property types in Obsidian's own *Property type* menu: **Object**, **Mixed list**, and **List of objects**. Choosing a type on an empty property creates its matching structure; a list of objects opens as a table
 - Per-path types for nested properties, with **Automatic** to go back to inferring from the value. Inside arrays you can set a field's type for all items or just one item
 - Changing to a type the current value doesn't fit asks for confirmation before converting it
-- Arrays of flat objects render as an **editable table**: edit cells with the native widgets, add/rename/reorder/delete columns, add/insert/duplicate/move/delete rows
+- Lists of flat objects render as an **editable table**: edit cells with the native widgets, add/rename/reorder/delete columns, add/insert/duplicate/move/delete rows. An empty typed table gets a visible `value` cell on its first row, which can be renamed
 - Flat lists (strings, numbers, booleans) render as normal list properties and stay expanded
 - Edit everything in place: rename nested keys by clicking them, add properties and list items, reorder, duplicate, cut/copy/paste and remove from the context menu
 - Collapsed properties show a one-line summary with an item count
 - Indent guides, adjustable indentation, initial expand level (per vault, or per note with `nestedProperties.initialExpandLevel`), and full key display
+- Touch-friendly row and property controls, with horizontally scrollable tables on narrow screens
 
 ## Settings
 
 | Setting | Default | Description |
 | --- | --- | --- |
 | Indentation | `16` | Pixel offset of nested rows from their parent |
-| Initial expand level | `1` | How many levels are expanded when a note opens (`0` collapses everything). Override per note with `nestedProperties.initialExpandLevel` |
+| Initial expand level | `0` | How many levels are expanded when a note opens (`0` collapses everything). Override per note with `nestedProperties.initialExpandLevel` |
 | Show arrays of objects as tables | on | Render lists of flat objects as an editable table instead of a tree |
 | Show indent guides | on | Draw a vertical guide line next to nested rows |
 | Show full keys | off | Size key labels to their content instead of truncating them |
