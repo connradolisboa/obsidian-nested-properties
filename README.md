@@ -1,11 +1,13 @@
-# Nested Properties (fork)
+# Nested Properties Plus
 
 [![GitHub release](https://img.shields.io/github/v/release/connradolisboa/obsidian-nested-properties)](https://github.com/connradolisboa/obsidian-nested-properties/releases)
 [![GitHub downloads](https://img.shields.io/github/downloads/connradolisboa/obsidian-nested-properties/total)](https://github.com/connradolisboa/obsidian-nested-properties/releases)
 
 This is a plugin for [Obsidian](https://obsidian.md/) that allows to view/edit nested frontmatter properties.
 
-This is an independent fork of the original [Nested Properties](https://github.com/mnaoumov/obsidian-nested-properties) plugin by Michael Naumov, maintained separately under its own plugin ID (`nested-properties-fork`) so it no longer tracks upstream releases.
+This started as a fork of [Nested Properties](https://github.com/mnaoumov/obsidian-nested-properties) by Michael Naumov. It has its own plugin ID (`nested-properties-plus`), name and CSS class prefix (`npp-`), so it can be installed next to the original without the two being confused. Don't enable both at once: they patch the same Obsidian internals.
+
+Type assignments are stored in Obsidian's own `types.json` using the same `list`/`object` type names and dotted keys as the original, so switching between the two keeps your types.
 
 Inspired by the [Feature request](https://forum.obsidian.md/t/properties-bases-support-multi-level-yaml-mapping-of-mappings-nested-attributes/63826).
 
@@ -27,11 +29,25 @@ level1Nested:
 
 ## Features
 
-- Render nested YAML objects and arrays as a collapsible tree inside the Properties editor
-- Collapse/expand individual properties or all at once
-- Context menu (Cut, Copy, Paste, Remove) on nested properties
-- Add new properties at any nesting level
-- Horizontal scrolling for deeply nested structures
+- Nested objects and arrays render as a collapsible tree inside the native Properties panel (and the File properties sidebar)
+- New property types: **Mixed list** (arrays holding objects or mixed values) and **Object**, available in Obsidian's own *Property type* menu too
+- Per-path types for nested properties, with **Automatic** to go back to inferring from the value. Inside arrays you can set a field's type for all items or just one item
+- Changing to a type the current value doesn't fit asks for confirmation before converting it
+- Arrays of flat objects render as an **editable table**: edit cells with the native widgets, add/rename/reorder/delete columns, add/insert/duplicate/move/delete rows
+- Flat lists (strings, numbers, booleans) render as normal list properties and stay expanded
+- Edit everything in place: rename nested keys by clicking them, add properties and list items, reorder, duplicate, cut/copy/paste and remove from the context menu
+- Collapsed properties show a one-line summary with an item count
+- Indent guides, adjustable indentation, initial expand level (per vault, or per note with `nestedProperties.initialExpandLevel`), and full key display
+
+## Settings
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| Indentation | `16` | Pixel offset of nested rows from their parent |
+| Initial expand level | `1` | How many levels are expanded when a note opens (`0` collapses everything). Override per note with `nestedProperties.initialExpandLevel` |
+| Show arrays of objects as tables | on | Render lists of flat objects as an editable table instead of a tree |
+| Show indent guides | on | Draw a vertical guide line next to nested rows |
+| Show full keys | off | Size key labels to their content instead of truncating them |
 
 ## Installation
 
@@ -52,7 +68,7 @@ By default, debug messages for this plugin are hidden.
 To show them, run the following command in the `DevTools Console`:
 
 ```js
-window.DEBUG.enable('nested-properties-fork');
+window.DEBUG.enable('nested-properties-plus');
 ```
 
 For more details, refer to the [documentation](https://github.com/mnaoumov/obsidian-dev-utils/blob/main/docs/debugging.md).

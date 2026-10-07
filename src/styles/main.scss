@@ -1,149 +1,358 @@
-.metadata-property:not(.nested-properties-container .metadata-property):has(> .metadata-property-value > .nested-properties-container) {
+// Every rule that changes the native property layout is gated on `:has(> .metadata-property-value > .npp-tree)`,
+// because Obsidian reuses property elements and one that held a nested value may later hold a plain one.
+
+.npp-collapsible:has(> .metadata-property-value > .npp-tree) {
   flex-wrap: wrap;
-  overflow: auto;
 
   > .metadata-property-value {
-    overflow: visible;
-    width: 100%;
-    margin-left: var(--nested-properties-indent, 144px);
+    flex: 1 1 100%;
+    min-width: 0;
+    padding: 0;
+    min-height: 0;
   }
 
-  &.is-collapsed {
+  &.npp-collapsed {
     flex-wrap: nowrap;
-    overflow: hidden;
 
     > .metadata-property-value {
-      flex-direction: row;
-      overflow: hidden;
-      width: auto;
-      margin-left: 0;
+      flex: 1 1 auto;
     }
   }
 }
 
-.nested-properties-container {
-  width: 100%;
+.metadata-property:not(:has(> .metadata-property-value > .npp-tree)) > .metadata-property-key > .npp-collapse-btn {
+  display: none;
+}
+
+.npp-tree {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  min-width: 0;
 
-  .metadata-property {
-    width: 100%;
-    border-bottom: none;
-    overflow: visible;
-  }
-
-  .nested-properties-collapsible {
-    flex-wrap: wrap;
-
-    > .metadata-property-value {
-      flex-direction: column;
-      overflow: visible;
-      width: 100%;
-      margin-left: var(--nested-properties-indent, 144px);
-
-}
-
-    &.is-collapsed > .metadata-property-value {
-      flex-direction: row;
-      overflow: hidden;
-      width: auto;
-      margin-left: 0;
-    }
+  > .npp-summary {
+    display: none;
   }
 }
 
-.nested-properties-collapsible {
-  &.is-collapsed {
-    flex-wrap: nowrap;
-  }
+.npp-tree.npp-inline > .npp-summary {
+  display: flex;
+  cursor: default;
+}
 
-  &.is-collapsed > .metadata-property-value > .nested-properties-container {
+.npp-collapsed > .metadata-property-value > .npp-tree {
+  > .npp-body {
     display: none;
   }
 
-  &.is-collapsed > .metadata-property-key > .nested-properties-collapse-btn {
-    transform: rotate(-90deg);
+  > .npp-summary {
+    display: flex;
   }
 }
 
-.nested-properties-summary {
-  display: none;
-  color: var(--text-muted);
-  font-style: italic;
-  cursor: pointer;
-  white-space: nowrap;
-
-  input[type="checkbox"] {
-    vertical-align: middle;
-    margin: 0 1px;
-    cursor: pointer;
-  }
-}
-
-.nested-properties-collapsible.is-collapsed > .metadata-property-value > .nested-properties-summary {
-  display: inline;
-}
-
-.metadata-container:not(:has(.nested-properties-collapsible)) .nested-properties-header-actions {
-  display: none;
-}
-
-.nested-properties-header-actions {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 4px;
-  vertical-align: middle;
-  opacity: 0;
-  transition: opacity 150ms;
-}
-
-.metadata-container:hover .nested-properties-header-actions {
-  opacity: 1;
-}
-
-.nested-properties-add-property {
+.npp-body {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 4px;
-  color: var(--text-muted);
-  font-size: var(--metadata-label-font-size);
-  cursor: pointer;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  margin-left: var(--npp-indent, 16px);
+  padding: 2px 0 4px 8px;
+  border-left: 1px solid var(--background-modifier-border);
+
+  body.npp-no-indent-guides & {
+    border-left-color: transparent;
+  }
+}
+
+.metadata-property.npp-root > .metadata-property-value > .npp-tree > .npp-body {
+  overflow-x: auto;
+}
+
+// Nested rows: drop the per-row box shadow so focusing a deep value doesn't outline every ancestor.
+.npp-row {
+  --metadata-property-box-shadow-hover: none;
+  --metadata-property-box-shadow-focus: none;
+  --metadata-property-padding: 0;
+  --metadata-divider-width: 0;
+
+  width: 100%;
   border-radius: var(--radius-s);
 
-  &:hover {
-    color: var(--text-normal);
-    background: var(--background-modifier-hover);
+  &:hover,
+  &:focus-within {
+    background-color: transparent;
   }
 
-  svg {
-    width: 16px;
-    height: 16px;
+  > .metadata-property-key:hover,
+  &:focus-within > .metadata-property-key:has(> .metadata-property-key-input:focus) {
+    background-color: var(--background-modifier-hover);
+    border-radius: var(--radius-s);
   }
 
-  input {
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--text-normal);
-    font-size: inherit;
-    padding: 0;
+  > .metadata-property-key > .metadata-property-key-input:not([readonly]) {
+    cursor: text;
   }
 }
 
-.nested-properties-collapse-btn {
+.npp-index-key {
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.npp-row:has(> .metadata-property-key > .npp-index-key):not(.npp-collapsible) > .metadata-property-key {
+  width: auto;
+  min-width: 3.5em;
+}
+
+.npp-collapse-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  color: var(--text-muted);
+  align-self: center;
   flex-shrink: 0;
   width: 16px;
   height: 16px;
+  margin-right: 2px;
+  color: var(--text-faint);
+  cursor: pointer;
   transition: transform 100ms ease-in-out;
+
+  &:hover {
+    color: var(--text-normal);
+  }
 
   svg {
     width: 10px;
     height: 10px;
+  }
+
+  .npp-collapsed > .metadata-property-key > & {
+    transform: rotate(-90deg);
+  }
+}
+
+.npp-summary {
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: var(--metadata-input-height);
+  padding: var(--metadata-input-padding);
+  color: var(--text-muted);
+  font-size: var(--metadata-input-font-size);
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover .npp-summary-text {
+    color: var(--text-normal);
+  }
+}
+
+.npp-summary-count {
+  flex-shrink: 0;
+  padding: 0 6px;
+  border-radius: var(--radius-s);
+  background-color: var(--background-modifier-hover);
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  line-height: 1.6;
+}
+
+.npp-summary-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.npp-add-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  min-height: calc(var(--metadata-input-height) * 0.85);
+  padding: 0 6px;
+  border-radius: var(--radius-s);
+  color: var(--text-faint);
+  font-size: var(--metadata-label-font-size);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-normal);
+    background-color: var(--background-modifier-hover);
+  }
+}
+
+.npp-add-button-icon {
+  display: inline-flex;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.npp-inline-input {
+  width: 100%;
+  min-width: 8em;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-normal);
+  font-size: inherit;
+  box-shadow: none;
+}
+
+// Tables (arrays of flat objects).
+
+.npp-table-wrap {
+  max-width: 100%;
+  margin: 4px 0 2px;
+  overflow-x: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+}
+
+.npp-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--metadata-input-font-size);
+
+  th,
+  td {
+    vertical-align: middle;
+    border: none;
+  }
+
+  th {
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    background-color: var(--background-secondary);
+    color: var(--text-muted);
+    font-family: var(--metadata-label-font);
+    font-size: var(--metadata-label-font-size);
+    font-weight: var(--font-medium);
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      color: var(--text-normal);
+      background-color: var(--background-modifier-hover);
+    }
+  }
+
+  th + th,
+  td + td {
+    border-left: 1px solid var(--background-modifier-border);
+  }
+
+  tbody tr:not(:last-child) td {
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+
+  tbody tr:hover td {
+    background-color: var(--background-modifier-hover);
+  }
+
+  tbody tr:focus-within td {
+    background-color: var(--background-modifier-hover);
+  }
+}
+
+.npp-table-column-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.npp-table-column-icon {
+  display: inline-flex;
+  color: var(--text-faint);
+
+  svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.npp-table-index {
+  width: 1%;
+  padding: 0 8px;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  cursor: pointer;
+
+  &:is(td):hover {
+    color: var(--text-normal);
+  }
+}
+
+.npp-table-cell {
+  min-width: 7em;
+  padding: 0;
+
+  > .metadata-property-value {
+    min-height: var(--metadata-input-height);
+    display: flex;
+    align-items: center;
+  }
+
+  > .metadata-property-value[data-property-type="checkbox"] {
+    justify-content: center;
+  }
+}
+
+.npp-table-add-column {
+  width: 1%;
+  color: var(--text-faint);
+
+  &.is-editing {
+    width: auto;
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+  }
+}
+
+.npp-table-filler {
+  width: 1%;
+}
+
+// Header actions next to the "Properties" heading.
+
+.metadata-container:not(:has(.npp-collapsible)) .npp-header-actions {
+  display: none;
+}
+
+.npp-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+  vertical-align: middle;
+  opacity: 0;
+  transition: opacity 150ms;
+
+  .metadata-container:hover & {
+    opacity: 1;
+  }
+}
+
+// Full key display.
+
+body.npp-full-key-display .metadata-container {
+  .metadata-property-key {
+    width: auto;
+    min-width: var(--metadata-label-width);
+  }
+
+  .metadata-property-key-input {
+    width: auto;
+    field-sizing: content;
   }
 }
